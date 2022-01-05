@@ -3,6 +3,7 @@ import random
 from centerField import CenterField
 from cornerField import CornerField
 from sideField import SideField
+from map import Map
 
 
 def create_fields(fields, number, resource, position):
@@ -34,5 +35,5 @@ if __name__ == '__main__':
         if resources[pos - 1] == "desert":
             fields[pos - 1].set_desert()
 
-
+    current_map = Map(fields)
     print("test")
