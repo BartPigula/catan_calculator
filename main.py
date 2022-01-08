@@ -36,4 +36,3 @@ if __name__ == '__main__':
             fields[pos - 1].set_desert()
 
     current_map = Map(fields)
-    print("test")
