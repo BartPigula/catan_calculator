@@ -5,16 +5,38 @@ class Map:
     def __init__(self, fields):
         self.fields = fields
         self.assign_resource_place()
-        res = self.all_resources()
-        print("test")
+        self.choose_winners()
 
     # calculate mean probability for given town placements
-    def get_wages(self):
-        pass
+    def get_wages(self, resources):
+        wages = []
+        for element in resources:
+            prob0 = self.spot_probability(element[0])
+            prob1 = self.spot_probability(element[1])
+            wages.append(prob0 + prob1 / 2)
+        return wages
+
+    def spot_probability(self, spot):
+        probability = 0
+        for position in spot:
+            field = self.get_certain_field(position)
+            chance = getattr(field, "chance")
+            probability += chance
+        probability = probability / 3
+        return probability
 
     # choose the most probable placement
     def choose_winners(self):
-        pass
+        possible_places = self.all_resources()
+        wages = self.get_wages(possible_places)
+        winner = possible_places[0]
+        highest_prob = wages[0]
+        for index, wage in enumerate(wages):
+            if wage > highest_prob:
+                winner = possible_places[index]
+                highest_prob = wage
+        print(
+            f"Mathematically, the best places for towns are {winner[0]},{winner[1]} with average probability equal to {highest_prob}")
 
     # get potential placements which assure having all possible resources (except desert)
     def all_resources(self):
@@ -33,23 +55,26 @@ class Map:
         potential_places = self.remove_duplicates(potential_places)
         return potential_places
 
-    def remove_duplicates(self, positions):
+    @staticmethod
+    def remove_duplicates(positions):
         # removing field such as [[4,1,5],[4,5,1]]
         for index, element in enumerate(positions):
             perms = [list(elem) for elem in itertools.permutations(element[1])]
             if element[0] in perms:
                 del positions[index]
-
-#NOT WORKING, TO IMPROVE
         # removing same fields throughout whole list
         for perm_index, element in enumerate(positions):
             perm0 = [list(elem) for elem in itertools.permutations(element[0])]
             perm1 = [list(elem) for elem in itertools.permutations(element[1])]
             length = len(positions)
-            to_delete = []
-            for del_index in range(perm_index + 1, length):
-                if (positions[del_index][0] in perm0) and (positions[del_index][1] in perm1):
-                    to_delete.append(del_index)
+            del_index = perm_index + 1
+            while del_index != length:
+                if ((positions[del_index][0] in perm0) and (positions[del_index][1] in perm1) or (
+                        positions[del_index][1] in perm0) and (positions[del_index][0] in perm1)):
+                    del positions[del_index]
+                    length = len(positions)
+                else:
+                    del_index += 1
         return positions
 
     # get all possible places for towns (excluding edges)
